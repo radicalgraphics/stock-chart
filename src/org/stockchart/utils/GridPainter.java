@@ -136,6 +136,8 @@ public class GridPainter
 					c.drawRect(_x, _y, _x + bounds.width(), _y + bounds.height(), paint);
 
 					app.applyText(paint);
+					paint.setTextAlign(Align.CENTER);
+					
 					c.drawText(label, _x, _y, paint);									
 				}
 			}
