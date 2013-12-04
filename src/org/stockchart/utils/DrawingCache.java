@@ -27,6 +27,11 @@ public class DrawingCache
 		public Canvas canvas;
 		public Bitmap bitmap;
 		
+		public boolean isValid()
+		{
+			return canvas != null && bitmap != null;
+		}
+		
 		public void recycle()
 		{
 			if(null != canvas)
@@ -69,7 +74,7 @@ public class DrawingCache
 	
 	public static boolean verifyParams(Params p,Canvas c)
 	{
-		if(null == p) return false;
+		if(null == p || !p.isValid()) return false;
 		
 		return (p.canvas.getWidth() == c.getWidth() && p.canvas.getHeight() == c.getHeight());
 	}

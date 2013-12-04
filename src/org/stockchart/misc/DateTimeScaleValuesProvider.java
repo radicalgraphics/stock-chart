@@ -118,10 +118,12 @@ public class DateTimeScaleValuesProvider  implements IScaleValuesProvider
 			fCalendar.setTime(prevDate);
 			int prev = fCalendar.get(fField);
 			
+			int y1 = fCalendar.get(Calendar.YEAR);
+			
 			fCalendar.setTime(date);
 			int curr = fCalendar.get(fField);
-			
-			return prev != curr;
+			int y2 = fCalendar.get(Calendar.YEAR);
+			return prev != curr || y1 != y2;
 		}
 		
 	}
@@ -143,7 +145,9 @@ public class DateTimeScaleValuesProvider  implements IScaleValuesProvider
 				new ComparerListPair(new SimpleDateComparer(EVERY_THIRTY_MINUTES)),
 				new ComparerListPair(new SimpleDateComparer(EVERY_HOUR)),
 				new ComparerListPair(new SimpleDateComparer(EVERY_FOUR_HOURS)),
-				new ComparerListPair(new ExtDateComparer(Calendar.DAY_OF_MONTH)),
+				new ComparerListPair(new ExtDateComparer(Calendar.DAY_OF_YEAR)),
+				new ComparerListPair(new ExtDateComparer(Calendar.WEEK_OF_YEAR)),
+				new ComparerListPair(new ExtDateComparer(Calendar.MONTH)),
 				new ComparerListPair(new ExtDateComparer(Calendar.YEAR)),
 			};
 
@@ -198,7 +202,7 @@ public class DateTimeScaleValuesProvider  implements IScaleValuesProvider
 				winningPair = p;
 				minCount = diff;
 				
-				if(diff <= valuesCount)
+				if(p.count() <= valuesCount)
 					break;
 			}
 		}

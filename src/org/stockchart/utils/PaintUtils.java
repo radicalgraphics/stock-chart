@@ -58,7 +58,7 @@ public class PaintUtils
 	{		
 		float o = a.getOutlineWidth();
 		if(o < 0f) return;
-		
+	
 		a.applyOutline(p);
 		
 		c.drawRect(o,o,rect.width()-o,rect.height()-o, p);

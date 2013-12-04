@@ -728,6 +728,8 @@ public class StockChartView extends View
 	 					invalidate();
 	 					fTouchEventHandled = true;
 	 				}
+	 				
+	 				fDragStartPoint.set(ev.getX(), ev.getY());	
 	 			}
 	 			
 	 			processCrosshair(ev.getX(),ev.getY());
