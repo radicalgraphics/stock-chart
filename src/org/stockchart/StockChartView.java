@@ -27,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.stockchart.core.Area;
+import org.stockchart.core.Area.IAxisAction;
 import org.stockchart.core.Axis;
 import org.stockchart.core.Axis.Side;
 import org.stockchart.core.AxisRange;
@@ -396,14 +397,21 @@ public class StockChartView extends View
 		
 		for(Area a: fAreas)
 		{			 
-			for(Axis axis:a.getAxes())
+			a.doAxisAction(new IAxisAction()
 			{
-				axis.getAxisRange().resetViewValues();
-			}
+				@Override
+				public boolean action(Integer id, Axis a) 
+				{
+									
+					a.getAxisRange().resetViewValues();
+					return true;
+				}
+				
+			});
 		}
 	}
 	
-	public void zoom(float hFactor, float vFactor)
+	public void zoom(final float hFactor, final float vFactor)
 	{
 		Set<Entry<Axis.Side, AxisRange>> entrySet = this.fGlobalRanges.entrySet();
 		Iterator<Entry<Axis.Side, AxisRange>> iterator = entrySet.iterator();
@@ -423,23 +431,29 @@ public class StockChartView extends View
 		for(Area a: fAreas)
 		{			 
 			if(!a.isVisible()) continue;
-			
-			Axis[] axes = a.getAxes();
-			
-			for(Axis axis:axes)
+						
+			a.doAxisAction(new IAxisAction()
 			{
-				if(!fGlobalRanges.containsKey(axis.getSide()))
+
+				@Override
+				public boolean action(Integer id, Axis a) 
 				{
-					if(axis.isHorizontal())
-						axis.getAxisRange().zoomViewValues(hFactor);
-					else if(axis.isVertical())
-						axis.getAxisRange().zoomViewValues(vFactor);
+					if(!fGlobalRanges.containsKey(a.getSide()))
+					{
+						if(a.isHorizontal())
+							a.getAxisRange().zoomViewValues(hFactor);
+						else if(a.isVertical())
+							a.getAxisRange().zoomViewValues(vFactor);
+					}
+					
+					return true;
 				}
-			}
+				
+			});
 		}
 	}
 	
-	public void move(float hFactor, float vFactor)
+	public void move(final float hFactor, final float vFactor)
 	{
 		Set<Entry<Axis.Side, AxisRange>> entrySet = this.fGlobalRanges.entrySet();
 		Iterator<Entry<Axis.Side, AxisRange>> iterator = entrySet.iterator();
@@ -459,19 +473,25 @@ public class StockChartView extends View
 		for(Area a: fAreas)
 		{			 
 			if(!a.isVisible()) continue;
-			
-			Axis[] axes = a.getAxes();
-			
-			for(Axis axis:axes)
+						
+			a.doAxisAction(new IAxisAction()
 			{
-				if(!fGlobalRanges.containsKey(axis.getSide()))
+
+				@Override
+				public boolean action(Integer id, Axis a) 
 				{
-					if(axis.isHorizontal())
-						axis.getAxisRange().moveViewValues(hFactor);
-					else if(axis.isVertical())
-						axis.getAxisRange().moveViewValues(vFactor);
+					if(!fGlobalRanges.containsKey(a.getSide()))
+					{
+						if(a.isHorizontal())
+							a.getAxisRange().moveViewValues(hFactor);
+						else if(a.isVertical())
+							a.getAxisRange().moveViewValues(vFactor);
+					}
+					
+					return true;
 				}
-			}
+				
+			});
 		}
 	}
 	
@@ -806,12 +826,15 @@ public class StockChartView extends View
 		{
 			if(!a.isVisible()) continue;
 			
-			Axis[] axes = a.getAxes();
-			
-			for(Axis axis:axes)
+			a.doAxisAction(new IAxisAction()
 			{
-				axis.setGlobalAxisRange(fGlobalRanges.get(axis.getSide()));
-			}
+				@Override
+				public boolean action(Integer id, Axis a) 
+				{
+					a.setGlobalAxisRange(fGlobalRanges.get(a.getSide()));
+					return true;
+				}
+			});
 		}	
 	}
 	
@@ -875,7 +898,7 @@ public class StockChartView extends View
 		return info;
 	}
 	
-	public void getHitTestInfo(HitTestInfo info, float x, float y, int hitTestOptions)
+	public void getHitTestInfo(final HitTestInfo info, final float x, final float y, int hitTestOptions)
 	{	
 		info.reset();
 		
@@ -1009,14 +1032,21 @@ public class StockChartView extends View
 				}
 				else
 				{
-					for(Axis axis : a.getAxes())
+					a.doAxisAction(new IAxisAction()
 					{
-						if(axis.getAbsoluteBounds().contains(x,y))
+						@Override
+						public boolean action(Integer id, Axis a)
 						{
-							info.element = axis;
-							break;
+							if(a.getAbsoluteBounds().contains(x,y))
+							{
+								info.element = a;
+								return false;
+							}
+							
+							return true;
 						}
-					}
+						
+					});	
 				}
 				
 				if(info.element == null)

@@ -32,6 +32,9 @@ public abstract class SeriesBase
 	private Axis.Side fXAxisSide = Axis.Side.BOTTOM;
 	private Axis.Side fYAxisSide = Axis.Side.RIGHT;
 	
+	private int fXAxisVirtualId = 0;
+	private int fYAxisVirtualId = 0;
+		
 	private int fIndexOffset = 0;
 	
 	private boolean fIsVisible = true;
@@ -54,6 +57,9 @@ public abstract class SeriesBase
 		j.put("indexOffset", fIndexOffset);
 		j.put("xAxisSide",fXAxisSide);
 		j.put("yAxisSide", fYAxisSide);
+		j.put("xAxisVirtualId",fXAxisVirtualId);
+		j.put("yAxisVirtualId", fYAxisVirtualId);
+		
 		j.put("visible", fIsVisible);
 		
 		if(!Double.isNaN(fLastValue))
@@ -69,7 +75,8 @@ public abstract class SeriesBase
 		fXAxisSide = Axis.Side.valueOf(j.getString("xAxisSide"));
 		fYAxisSide = Axis.Side.valueOf(j.getString("yAxisSide"));
 		fIsVisible = j.getBoolean("visible");
-		
+		fXAxisVirtualId = j.getInt("xAxisVirtualId");
+		fYAxisVirtualId = j.getInt("yAxisVirtualId");
 		fLastValue = j.has("lastValue")?j.getDouble("lastValue"):Double.NaN;
 	}
 	
@@ -226,7 +233,23 @@ public abstract class SeriesBase
 	{
 		return fLastValue;
 	}
-	
+
+	public int getXAxisVirtualId() {
+		return fXAxisVirtualId;
+	}
+
+	public void setXAxisVirtualId(int v) {
+		this.fXAxisVirtualId = v;
+	}
+
+
+	public int getYAxisVirtualId() {
+		return fYAxisVirtualId;
+	}
+
+	public void setYAxisVirtualId(int v) {
+		this.fYAxisVirtualId = v;
+	}
 	
 	public boolean isVisibleOnScreen(double viewMax, double viewMin)
 	{

@@ -83,10 +83,10 @@ public class Plot extends ChartElement
 		}
 
 		this.fSeriesPaintInfo.reset();
+		
 		for(SeriesBase s: this.getArea().getSeries())
 		{				
-			fSeriesPaintInfo.loadFrom(this.getArea().getAxis(s.getXAxisSide()), this.getArea().getAxis(s.getYAxisSide()));
-
+			fSeriesPaintInfo.loadFrom(this.getArea().getAxis(s.getXAxisSide(),s.getXAxisVirtualId()), this.getArea().getAxis(s.getYAxisSide(),s.getYAxisVirtualId()));
 			c.save();
 			s.draw(c, fSeriesPaintInfo);
 			c.restore();							

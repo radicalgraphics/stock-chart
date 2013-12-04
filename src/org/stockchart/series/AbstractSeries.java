@@ -77,7 +77,7 @@ public abstract class AbstractSeries<T extends AbstractPoint> extends SeriesBase
 
 		preDraw();
 		
-		for(int i=index;i<getPointCount();i++)
+		for(int i=Math.max(index-1,0);i<getPointCount();i++)
 		{
 			T p = this.fPoints.get(i);			
 			

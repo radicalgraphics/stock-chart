@@ -43,7 +43,8 @@ public class Axis extends ChartElement implements GridPainter.IGridLabelsProvide
 		LEFT,
 		RIGHT,
 		TOP,
-		BOTTOM
+		BOTTOM,
+		UNKNOWN
 	}		
 	
 	public interface ILabelFormatProvider
@@ -84,6 +85,11 @@ public class Axis extends ChartElement implements GridPainter.IGridLabelsProvide
 	private boolean fIsLogarithmic = false;
 	
 	private DecimalFormat fDecimalFormat = new DecimalFormat();
+	
+	Axis(Area parent)
+	{
+		this(parent,Side.UNKNOWN);
+	}
 	
 	Axis(Area parent, Side side)
 	{
@@ -396,13 +402,14 @@ public class Axis extends ChartElement implements GridPainter.IGridLabelsProvide
 			{
 				pos = GridLabelPosition.NEAR;
 			}
-			break;
-		
+			break;		
 			case BOTTOM:
 			{
 				pos = GridLabelPosition.NEAR;
 			}
-			break;			
+			break;
+			default:
+			break;
 		}
 			
 		Double[] values = this.getScaleValues(fPaintInfo);

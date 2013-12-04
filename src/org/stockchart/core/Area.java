@@ -17,6 +17,9 @@
 package org.stockchart.core;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,11 +37,20 @@ import android.graphics.RectF;
 
 public class Area extends ChartElement
 {
+	public final int LEFT_AXIS_ID = 0;
+	public final int RIGHT_AXIS_ID = 1;
+	public final int TOP_AXIS_ID = 2;
+	public final int BOTTOM_AXIS_ID = 3;
+	
+	public final int VIRTUAL_AXIS_ID = 100;
+	
+	private static int VIRTUAL_COUNT = 0;
+	
 	private final ArrayList<SeriesBase> fSeries = new ArrayList<SeriesBase>();
 	private final ArrayList<Line> fLines = new ArrayList<Line>();
 	private final ArrayList<AbstractSticker> fStickers = new ArrayList<AbstractSticker>();
-	
-	private final Axis[] fAxes;
+		
+	private final TreeMap<Integer, Axis> fAxes = new TreeMap<Integer, Axis>();
 	
 	private final Appearance fAreaAppearance = new Appearance();
 		
@@ -66,18 +78,20 @@ public class Area extends ChartElement
 
 	private boolean fVisible = true;
 
+	public interface IAxisAction
+	{
+		public boolean action(Integer id, Axis a);
+	}
+	
 	public Area()
 	{
 		super(null);
-		
-		fAxes = new Axis[] 
-					{ 
-						new Axis(this,Side.LEFT),
-						new Axis(this,Side.RIGHT),
-						new Axis(this,Side.TOP),
-						new Axis(this,Side.BOTTOM)
-					}; 
-		
+
+		fAxes.put(LEFT_AXIS_ID, new Axis(this,Side.LEFT));
+		fAxes.put(TOP_AXIS_ID, new Axis(this,Side.TOP));
+		fAxes.put(BOTTOM_AXIS_ID, new Axis(this,Side.BOTTOM));
+		fAxes.put(RIGHT_AXIS_ID, new Axis(this,Side.RIGHT));
+
 		fName = "Area"+String.valueOf(++DEFAULT_NAME_ID);
 				
 		fAreaAppearance.setOutlineColor(Color.BLACK);
@@ -85,6 +99,23 @@ public class Area extends ChartElement
 		Theme.fillAppearanceFromCurrentTheme(Area.class, fAreaAppearance);
 		
 	}		
+	
+	public void removeVirtualAxis(int id)
+	{
+		if(id < this.VIRTUAL_AXIS_ID) return;
+		
+		this.fAxes.remove(id);
+	}
+	
+	public int addVirtualAxis(Axis.Side side)
+	{
+		int id = this.VIRTUAL_AXIS_ID + (++VIRTUAL_COUNT);
+		
+		Axis a = new Axis(this,side);
+		this.fAxes.put(id, a);
+		
+		return id;
+	}
 	
 	public float getCoordinate(Axis.Side side, double value)
 	{
@@ -153,12 +184,23 @@ public class Area extends ChartElement
 		JSONArray ja = null;
 		
 		ja = j.getJSONArray("axes");
-		int i = 0;
-		for(Axis axis:fAxes)
+		fAxes.clear();
+		for(int k=0;k<ja.length();k++)
 		{
-			axis.fromJSONObject(ja.getJSONObject(i));
-			i++;
+			JSONObject ss = ja.getJSONObject(k);
+			
+			Axis a = new Axis(this);
+			a.fromJSONObject(ss.getJSONObject("axis"));
+			
+			Integer id = ss.getInt("id");
+			fAxes.put(id, a);
 		}
+//		int i = 0;
+//		for(Axis axis:fAxes)
+//		{
+//			axis.fromJSONObject(ja.getJSONObject(i));
+//			i++;
+//		}
 		
 		ja = j.getJSONArray("lines");
 		fLines.clear();
@@ -213,11 +255,18 @@ public class Area extends ChartElement
 		r.put("plotAppearance",fPlot.getAppearance().toJSONObject());
 		r.put("legend", fLegend.toJSONObject());
 		
-		JSONArray axes = new JSONArray();
+		JSONArray axes = new JSONArray();		
+		Iterator<Entry<Integer, Axis>> i = this.fAxes.entrySet().iterator();
 		
-		for(Axis axis:fAxes)
+		while(i.hasNext())
 		{
-			axes.put(axis.toJSONObject());
+			Entry<Integer, Axis> kvp = i.next();
+			
+			JSONObject ss = new JSONObject();
+			ss.put("id", kvp.getKey());
+			ss.put("axis", kvp.getValue().toJSONObject());
+			
+			axes.put(ss);
 		}
 		
 		JSONArray lines = new JSONArray();
@@ -255,12 +304,18 @@ public class Area extends ChartElement
 		
 	}
 	
-	public void setAllAxesVisible(boolean value)
+	public void setAllAxesVisible(final boolean value)
 	{
-		for(Axis a:this.fAxes)
+		this.doAxisAction(new IAxisAction() 
 		{
-			a.setVisible(value);
-		}
+			@Override
+			public boolean action(Integer id, Axis a) 
+			{
+				a.setVisible(value);
+				return true;
+			}
+			
+		});
 	}
 	
 	public void setAxesVisible(boolean left,boolean top,boolean right,boolean bottom)
@@ -361,26 +416,40 @@ public class Area extends ChartElement
 		fTitle = s;
 	}
 	
-	public void move(float hFactor, float vFactor)
+	public void move(final float hFactor, final float vFactor)
 	{
-		for(Axis a: fAxes)
+		this.doAxisAction(new IAxisAction()
 		{
-			if(a.isHorizontal())									
-				a.getAxisRange().moveViewValues(hFactor);
-			else if(a.isVertical())
-				a.getAxisRange().moveViewValues(vFactor);
-		}
+			@Override
+			public boolean action(Integer id, Axis a) 
+			{
+				if(a.isHorizontal())									
+					a.getAxisRange().moveViewValues(hFactor);
+				else if(a.isVertical())
+					a.getAxisRange().moveViewValues(vFactor);
+				
+				return true;
+			}
+			
+		});
 	}
 		
-	public void zoom(float hFactor, float vFactor)
+	public void zoom(final float hFactor, final float vFactor)
 	{
-		for(Axis a: fAxes)
+		this.doAxisAction(new IAxisAction()
 		{
-			if(a.isHorizontal())									
-				a.getAxisRange().zoomViewValues(hFactor);
-			else if(a.isVertical())
-				a.getAxisRange().zoomViewValues(vFactor);
-		}
+
+			@Override
+			public boolean action(Integer id, Axis a) 
+			{
+				if(a.isHorizontal())									
+					a.getAxisRange().zoomViewValues(hFactor);
+				else if(a.isVertical())
+					a.getAxisRange().zoomViewValues(vFactor);			
+				
+				return true;
+			}
+		});
 	}
 	
 	public Axis getAxis(Side side)
@@ -391,17 +460,36 @@ public class Area extends ChartElement
 		case RIGHT: return getRightAxis();
 		case TOP: return getTopAxis();
 		case BOTTOM: return getBottomAxis();
+		default: return null;
 		}
-		
-		return null;
 	}
 	
-	public Axis[] getAxes() { return fAxes; }
+	public Axis getAxis(Side side, int id)
+	{
+		if(id < VIRTUAL_AXIS_ID)
+		{
+			return getAxis(side);
+		}
+		
+		return getVirtualAxis(id);
+	}
 	
-	public Axis getLeftAxis() { return fAxes[0]; }
-	public Axis getRightAxis() { return fAxes[1]; }
-	public Axis getTopAxis() { return fAxes[2]; }
-	public Axis getBottomAxis() { return fAxes[3]; }
+	public Axis getVirtualAxis(int id)
+	{
+		if(id < VIRTUAL_AXIS_ID) return null;
+		
+		return fAxes.get(id);
+	}
+	
+	public Iterable<Axis> getAxes()
+	{
+		return fAxes.values();		
+	}
+	
+	public Axis getLeftAxis() { return fAxes.get(LEFT_AXIS_ID); }
+	public Axis getRightAxis() { return fAxes.get(RIGHT_AXIS_ID); }
+	public Axis getTopAxis() { return fAxes.get(TOP_AXIS_ID); }
+	public Axis getBottomAxis() { return fAxes.get(BOTTOM_AXIS_ID); }
 
 	public void setAutoHeight(boolean value)
 	{
@@ -429,7 +517,7 @@ public class Area extends ChartElement
 		{
 			if(!s.isVisible() || !s.hasPoints()) continue;
 				
-			Axis xAxis = this.getAxis(s.getXAxisSide());
+			Axis xAxis = this.getAxis(s.getXAxisSide(),s.getXAxisVirtualId());
 			
 			if(xAxis.getAxisRange().isAuto())
 			{
@@ -444,8 +532,8 @@ public class Area extends ChartElement
 		{
 			if(!s.isVisible() || !s.hasPoints()) continue;
 			
-			Axis xAxis = this.getAxis(s.getXAxisSide());
-			Axis yAxis = this.getAxis(s.getYAxisSide());
+			Axis xAxis = this.getAxis(s.getXAxisSide(), s.getXAxisVirtualId());
+			Axis yAxis = this.getAxis(s.getYAxisSide(), s.getYAxisVirtualId());
 			
 			if(yAxis.getAxisRange().isAuto())
 			{
@@ -462,8 +550,16 @@ public class Area extends ChartElement
 	
 	public void resetAutoValues()
 	{
-		for(Axis a: fAxes)
-			a.getAxisRange().resetAutoValues();			
+		this.doAxisAction(new IAxisAction()
+		{
+			@Override
+			public boolean action(Integer id, Axis a) 
+			{
+				a.getAxisRange().resetAutoValues();
+				return true;
+			}
+		
+		});			
 	}
 	
 	public void calcAutoValues()
@@ -499,6 +595,8 @@ public class Area extends ChartElement
 				break;
 			case TOP:
 				r.top+=size.height();
+				break;
+			default:
 				break;
 			
 			}
@@ -571,6 +669,23 @@ public class Area extends ChartElement
 				
 		fPlot.setBounds(margins.left, margins.top, horizontalAxisWidth, verticalAxisHeight);
 		
+		this.doAxisAction(new IAxisAction()
+		{
+			@Override
+			public boolean action(Integer id, Axis a) 
+			{
+				if(id >= VIRTUAL_AXIS_ID)
+				{
+					if(a.isVertical())
+						a.setBounds(0f,0f,0f,verticalAxisHeight);
+					else if(a.isHorizontal())
+						a.setBounds(0f,0f,0f,horizontalAxisWidth);
+				}
+				
+				return true;
+			}
+			
+		});
 		switch(fLegend.getSide())
 		{
 		case LEFT:
@@ -585,11 +700,26 @@ public class Area extends ChartElement
 		case BOTTOM:
 			fLegend.setBounds(margins.left+(horizontalAxisWidth-legendSize.width())/2f,getBounds().height() - legendSize.height(),legendSize.width(), legendSize.height());
 			break;
+		default:
+			break;
 		}
 	}	
 	
 	private void drawClear(Canvas c)
 	{
 		PaintUtils.drawFullRect(c, this.Paint(), fAreaAppearance,c.getClipBounds());
+	}
+	
+	public void doAxisAction(IAxisAction a)
+	{		
+		Iterator<Entry<Integer, Axis>> i = this.fAxes.entrySet().iterator();
+		
+		while(i.hasNext())
+		{
+			Entry<Integer, Axis> e = i.next();
+			
+			if(!a.action(e.getKey(), e.getValue()))
+				break;
+		}
 	}
 }
