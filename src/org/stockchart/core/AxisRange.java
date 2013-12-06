@@ -310,6 +310,20 @@ public class AxisRange
 		
 	}
 
+	public void expandValues(double maxValue,double minValue)
+	{			
+		if(0 == Double.compare(fMinValue, Double.NaN))
+			fMinValue = minValue;
+		else if(minValue < fMinValue)
+			fMinValue = minValue;
+		
+		if(0 == Double.compare(fMaxValue, Double.NaN))
+			fMaxValue = maxValue;
+		else if(maxValue > fMaxValue)
+			fMaxValue = maxValue;
+		
+	}
+	
 	/** 
 	    * Sets range's maximum and minimum values (NOT view values)
 	    *

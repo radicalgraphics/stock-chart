@@ -805,7 +805,9 @@ public class StockChartView extends View
 		{
 			Entry<Axis.Side, AxisRange> i = iterator.next();
 			
-			AxisRange dst = i.getValue();
+			final AxisRange dst = i.getValue();
+			final Axis.Side side = i.getKey();
+			
 			dst.resetAutoValues();
 			
 			if(dst.isAuto())
@@ -814,10 +816,21 @@ public class StockChartView extends View
 				{
 					if(!a.isVisible()) continue;
 					
-					Axis axis = a.getAxis(i.getKey());	
-					AxisRange src = axis.getAxisRange();
-					
-					dst.expandAutoValues(src.getMaxOrAutoValue(), src.getMinOrAutoValue());
+					a.doAxisAction(new IAxisAction()
+					{
+						@Override
+						public boolean action(Integer id, Axis a) 
+						{
+							if(a.getSide() == side)
+							{
+								AxisRange src = a.getAxisRange();
+								
+								dst.expandAutoValues(src.getMaxOrAutoValue(), src.getMinOrAutoValue());
+							}
+							a.setGlobalAxisRange(fGlobalRanges.get(a.getSide()));
+							return true;
+						}
+					});				
 				}
 			}
 		}
