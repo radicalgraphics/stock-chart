@@ -17,8 +17,10 @@ package org.stockchart.core;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.stockchart.utils.PaintUtils;
 import org.stockchart.utils.SizeF;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.LinearGradient;
@@ -28,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
+import android.util.DisplayMetrics;
 
 /**
  * @author alexv
@@ -66,7 +69,7 @@ public class Appearance
 		private Typeface fTypeface;
 
 		private int fColor = Color.BLACK;
-		private float fSize = 12f;
+		private float fSizeInDips = 12f;
 		
 		public Font()
 		{
@@ -78,20 +81,22 @@ public class Appearance
 			return fColor;
 		}
 		
-		public float getSize()
+		public float getSizeInDips()
 		{
-			return fSize;
+			return fSizeInDips;
+		}
+		
+		public void setSizeInDips(float dips)
+		{
+			fSizeInDips = dips;
 		}
 		
 		public void setColor(int c)
 		{
 			fColor = c;
 		}
+
 		
-		public void setSize(float sz)
-		{
-			fSize = sz;
-		}
 		public Typeface getTypeface()
 		{
 			return fTypeface;
@@ -134,7 +139,7 @@ public class Appearance
 			fFileName = f.fFileName;
 			fFontStyle = f.fFontStyle;
 			fColor = f.fColor;
-			fSize = f.fSize;
+			fSizeInDips = f.fSizeInDips;
 			
 			reloadTypeface();
 		}
@@ -147,7 +152,7 @@ public class Appearance
 			obj.put("fileName", fFileName);
 			obj.put("fontStyle", fFontStyle);
 			obj.put("color", fColor);
-			obj.put("size", fSize);
+			obj.put("size", fSizeInDips);
 			return obj;
 		}
 		
@@ -158,7 +163,7 @@ public class Appearance
 			fFileName = j.has("fileName")?j.getString("fileName"):null;
 			fFontStyle = FontStyle.valueOf(j.getString("fontStyle"));
 			fColor = j.getInt("color");
-			fSize = (float)j.getDouble("size");
+			fSizeInDips = (float)j.getDouble("size");
 			
 			reloadTypeface();
 		}
@@ -187,6 +192,13 @@ public class Appearance
 	private static final DashPathEffect DASH_EFFECT = new DashPathEffect(new float[] {5,3},0);
 	
 	private static final Rect fTempRect = new Rect();
+	
+	private static float DENSITY = DisplayMetrics.DENSITY_DEFAULT;
+	
+	public static void setup(Context c)
+	{
+		DENSITY = c.getResources().getDisplayMetrics().density;		
+	}
 	
 	public void fill(Appearance a)
 	{
@@ -310,7 +322,7 @@ public class Appearance
 	public void applyText(Paint p)
 	{
 		p.reset();
-		p.setTextSize(fFont.getSize());
+		p.setTextSize(PaintUtils.dipToPixels(fFont.getSizeInDips(),DENSITY));
 		p.setColor(fFont.getColor());
 		p.setTypeface(fFont.getTypeface());
 		p.setAntiAlias(fIsAntialias);
@@ -366,7 +378,7 @@ public class Appearance
 		}
 	}
 	
-	
+
 	static int fontStyleToTypefaceConstant(FontStyle fs)
 	{
 		switch(fs)

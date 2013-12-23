@@ -22,6 +22,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.DisplayMetrics;
 
 /**
  * @author alexv
@@ -33,6 +34,10 @@ public class PaintUtils
 	
 	private static final RectF fTempRectF = new RectF();
 	
+	public static float dipToPixels(float dips,float density)
+	{
+		return Math.round(dips * density / DisplayMetrics.DENSITY_DEFAULT);
+	}
 	/**
 	 * Workaround for possible bug https://code.google.com/p/android/issues/detail?id=29944
 	 */
