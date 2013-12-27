@@ -164,8 +164,8 @@ public class Axis extends ChartElement implements GridPainter.IGridLabelsProvide
 	{
 		JSONObject r = new JSONObject();
 		r.put("side", fSide);
-		r.put("size", fInvisibleSize);
-		r.put("invisibleSize", fSize);
+		r.put("size", fSize);
+		r.put("invisibleSize", fInvisibleSize);
 		r.put("visible",fIsVisible);
 		r.put("drawLastValue", fDrawLastValue);
 		r.put("linesCount", fLinesCount);
