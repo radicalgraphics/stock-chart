@@ -573,10 +573,10 @@ public class Area extends ChartElement
 	{
 		RectF r = new RectF();
 		
-		r.left = getLeftAxis().getSize(0f);
-		r.right = getRightAxis().getSize(0f);
-		r.top = getTopAxis().getSize(0f);
-		r.bottom = getBottomAxis().getSize(0f);
+		r.left = getLeftAxis().getSizeOrInvisibleSize();
+		r.right = getRightAxis().getSizeOrInvisibleSize();
+		r.top = getTopAxis().getSizeOrInvisibleSize();
+		r.bottom = getBottomAxis().getSizeOrInvisibleSize();
 				
 		if(fLegend.isVisible())
 		{
@@ -661,11 +661,11 @@ public class Area extends ChartElement
 		final float horizontalAxisWidth = getBounds().width() - (margins.left +  margins.right);
 		final float verticalAxisHeight = getBounds().height() - (margins.top +  margins.bottom);
 										
-		getTopAxis().setBounds(margins.left,margins.top - getTopAxis().getSize(0f),horizontalAxisWidth,getTopAxis().getSize(0f)); 
-		getBottomAxis().setBounds(margins.left,getBounds().height() - margins.bottom,horizontalAxisWidth,getBottomAxis().getSize(0f));
+		getTopAxis().setBounds(margins.left,margins.top - getTopAxis().getSizeOrInvisibleSize(),horizontalAxisWidth,getTopAxis().getSizeOrInvisibleSize()); 
+		getBottomAxis().setBounds(margins.left,getBounds().height() - margins.bottom,horizontalAxisWidth,getBottomAxis().getSizeOrInvisibleSize());
 		
-		getLeftAxis().setBounds(margins.left - getLeftAxis().getSize(0f),margins.top,getLeftAxis().getSize(0f),verticalAxisHeight);
-		getRightAxis().setBounds(getBounds().width()-margins.right, margins.top, getRightAxis().getSize(0f), verticalAxisHeight);
+		getLeftAxis().setBounds(margins.left - getLeftAxis().getSizeOrInvisibleSize(),margins.top,getLeftAxis().getSizeOrInvisibleSize(),verticalAxisHeight);
+		getRightAxis().setBounds(getBounds().width()-margins.right, margins.top, getRightAxis().getSizeOrInvisibleSize(), verticalAxisHeight);
 				
 		fPlot.setBounds(margins.left, margins.top, horizontalAxisWidth, verticalAxisHeight);
 		

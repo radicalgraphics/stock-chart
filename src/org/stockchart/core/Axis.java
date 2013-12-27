@@ -61,6 +61,7 @@ public class Axis extends ChartElement implements GridPainter.IGridLabelsProvide
 	
 	private Side fSide;
 	private float fSize;
+	private float fInvisibleSize = 5f;
 	private boolean fIsVisible = true;
 	
 	private boolean fDrawLastValue = true;
@@ -147,6 +148,7 @@ public class Axis extends ChartElement implements GridPainter.IGridLabelsProvide
 	{
 		fSide = Side.valueOf(j.getString("side"));
 		fSize = (float)j.getDouble("size");
+		fInvisibleSize = (float)j.getDouble("invisibleSize");
 		fIsVisible = j.getBoolean("visible");
 		fDrawLastValue = j.getBoolean("drawLastValue");
 		fLinesCount = j.getInt("linesCount");		
@@ -162,7 +164,8 @@ public class Axis extends ChartElement implements GridPainter.IGridLabelsProvide
 	{
 		JSONObject r = new JSONObject();
 		r.put("side", fSide);
-		r.put("size", fSize);
+		r.put("size", fInvisibleSize);
+		r.put("invisibleSize", fSize);
 		r.put("visible",fIsVisible);
 		r.put("drawLastValue", fDrawLastValue);
 		r.put("linesCount", fLinesCount);
@@ -275,10 +278,21 @@ public class Axis extends ChartElement implements GridPainter.IGridLabelsProvide
 		return result;
 	}
 
-	public float getSize(float sizeIfInvisible)
+	public float getSizeOrInvisibleSize()
 	{
-		return isVisible()?getSize():sizeIfInvisible;
+		return isVisible()?getSize():getInvisibleSize();
 	}
+	
+	public float getInvisibleSize()
+	{
+		return fInvisibleSize;
+	}
+
+	public void setInvisibleSize(float v)
+	{
+		fInvisibleSize = v;
+	}
+	
 	
 	public float getSize()
 	{
