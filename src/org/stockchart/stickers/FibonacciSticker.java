@@ -54,7 +54,7 @@ public class FibonacciSticker extends AbstractSticker
 	{
 		RETRACEMENTS.put(0.0f, "0.0%");
 		RETRACEMENTS.put(0.236f, "23.6%");
-		RETRACEMENTS.put(0.382f, "23.6%");
+		RETRACEMENTS.put(0.382f, "38.2%");
 		RETRACEMENTS.put(0.5f, "50.0%");
 		RETRACEMENTS.put(0.618f, "61.8%");
 		RETRACEMENTS.put(1.0f, "100.0%");
